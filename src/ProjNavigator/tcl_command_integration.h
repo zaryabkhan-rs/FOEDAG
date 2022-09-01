@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QString>
 #include <ostream>
 
+#include "Main/ProjectFile/ProjectFileLoader.h"
+#include "NewProject/ProjectManager/project_manager.h"
 namespace FOEDAG {
 
 class ProjectManager;
@@ -62,6 +64,9 @@ class TclCommandIntegration : public QObject {
  private:
   ProjectManager *m_projManager;
   SourcesForm *m_form;
+  QList<filedata> m_lisFileData;
+  QList<filedata> m_lisconstData;
+  ProjectFileLoader loader;
 };
 
 }  // namespace FOEDAG

@@ -20,14 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "tcl_command_integration.h"
 
-#include <QDebug>
 #include <QDir>
+#include <QFileDialog>
 #include <QString>
 
 #include "Compiler/CompilerDefines.h"
 #include "NewProject/ProjectManager/project_manager.h"
 #include "ProjNavigator/sources_form.h"
-
 namespace FOEDAG {
 
 TclCommandIntegration::TclCommandIntegration(ProjectManager *projManager,
@@ -234,7 +233,6 @@ bool TclCommandIntegration::TclCreateProject(const QString &name,
   if (dir.exists()) {
     out << "Project \"" << name.toStdString() << "\" was rewritten.";
   }
-
   createNewDesign(name);
   return true;
 }
@@ -244,17 +242,47 @@ ProjectManager *TclCommandIntegration::GetProjectManager() {
 }
 
 void TclCommandIntegration::createNewDesign(const QString &projName) {
+  // QString path = QString("%2/%3").arg(QDir::currentPath(), projName);
+  filedata fdata;
+  QDir s(
+      "/home/administrator/Zaryab-RS/FOEDAG-1/FOEDAG/tests/Testcases/oneff/");
+  foreach (QString fileName,
+           s.entryList({"*.v", "*.sv", "*.vhd"}, QDir::Files)) {
+    QString suffix =
+        fileName.right(fileName.size() - (fileName.lastIndexOf(".") + 1));
+
+    fdata.m_isFolder = false;
+    fdata.m_fileType = suffix;
+    fdata.m_fileName = fileName;
+    fdata.m_filePath = s.currentPath();
+    m_lisFileData.append(fdata);
+  }
+
+  QDir w(
+      "/home/administrator/Zaryab-RS/FOEDAG-1/FOEDAG/tests/Testcases/oneff/");
+  foreach (QString fileName, w.entryList({"*.sdc", "*.SDC"}, QDir::Files)) {
+    QString suffix =
+        fileName.right(fileName.size() - (fileName.lastIndexOf(".") + 1));
+
+    fdata.m_isFolder = false;
+    fdata.m_fileType = suffix;
+    fdata.m_fileName = fileName;
+    fdata.m_filePath = s.currentPath();
+    m_lisconstData.append(fdata);
+  }
+
   ProjectOptions opt{projName,
                      QString("%1/%2").arg(QDir::currentPath(), projName),
                      "RTL",
-                     {{}, false},
-                     {{}, false},
+                     {m_lisFileData, true},
+                     {m_lisconstData, true},
                      {},
                      true /*rewrite*/,
                      DEFAULT_FOLDER_SOURCE};
   m_projManager->CreateProject(opt);
   QString newDesignStr{m_projManager->getProjectPath() + "/" +
                        m_projManager->getProjectName() + PROJECT_FILE_FORMAT};
+  loader.Save();
   emit newDesign(newDesignStr);
   update();
 }
